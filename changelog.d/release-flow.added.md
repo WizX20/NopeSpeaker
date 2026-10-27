@@ -1,0 +1,1 @@
+- added: releases - weekly GitHub Releases with x64 and ARM64 zips, installable with Scoop (`scoop bucket add nopespeaker https://github.com/WizX20/NopeSpeaker`) and winget (`winget install WizX20.NopeSpeaker`)

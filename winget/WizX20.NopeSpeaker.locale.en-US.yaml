@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
+PackageIdentifier: WizX20.NopeSpeaker
+PackageVersion: {{VERSION}}
+PackageLocale: en-US
+Publisher: WizX20
+PublisherUrl: https://github.com/WizX20
+PublisherSupportUrl: https://github.com/WizX20/NopeSpeaker/issues
+PackageName: NopeSpeaker
+PackageUrl: https://github.com/WizX20/NopeSpeaker
+License: MIT
+LicenseUrl: https://github.com/WizX20/NopeSpeaker/blob/main/LICENSE
+Copyright: (c) 2026 WizX20
+ShortDescription: Choose, per Bluetooth speaker or headset, whether Windows may switch your audio to it when it connects.
+Description: |-
+  Windows moves your sound to a Bluetooth speaker or headset the moment it connects. NopeSpeaker
+  lists your paired Bluetooth devices and lets you switch, per device, whether Windows may play
+  audio on it: a switched-off device still pairs and connects, Windows just plays nothing on it.
+  Each change disables or enables the device's audio nodes and asks for administrator rights (UAC).
+Moniker: nopespeaker
+Tags:
+  - audio
+  - bluetooth
+  - headset
+  - speaker
+  - sound
+ReleaseNotesUrl: https://github.com/WizX20/NopeSpeaker/releases/tag/v{{VERSION}}
+ManifestType: defaultLocale
+ManifestVersion: 1.10.0

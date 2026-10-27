@@ -1,0 +1,348 @@
+name: Release
+
+# Runs once a week (Tuesday 06:00 UTC) and on manual dispatch. Nothing else triggers it.
+# A scheduled run releases only when main moved since the last release, bumping the patch
+# version; for a minor/major bump raise <Version> in Directory.Build.props in a PR (the next
+# release uses it as-is), or dispatch with an explicit version.
+# One run: stamp version + CHANGELOG, test, pack the x64 and ARM64 zips, update the Scoop
+# manifest with their hashes, draft the GitHub Release with the zips attached, push commit + tag
+# to main, publish the draft. Then a separate job submits the winget manifest.
+on:
+  schedule:
+    - cron: "0 6 * * 2"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to release, without the v (e.g. 1.2.0). Empty = next patch version."
+        required: false
+        type: string
+        default: ""
+      winget:
+        description: "Submit the release to winget (needs the WINGET_PAT secret)"
+        required: false
+        type: boolean
+        default: true
+
+# Nothing by default; each job asks for what it uses.
+permissions: {}
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    # Waits up to 20 minutes for CI on the commit to release, and up to 5 for that run to appear.
+    timeout-minutes: 30
+    permissions:
+      contents: read # the repository and its releases
+      actions: read # the CI runs of the commit to release
+    outputs:
+      should_release: ${{ steps.decide.outputs.should_release }}
+      version: ${{ steps.decide.outputs.version }}
+      # The commit this job decided on and waited for CI on. The release job builds exactly
+      # this one, not whatever main is by then.
+      sha: ${{ steps.decide.outputs.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Decide whether and what to release
+        id: decide
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # Through the environment, never spliced into the script: the input is free text.
+          REQUESTED: ${{ inputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          CURRENT=$(sed -n 's:.*<Version>\([^<]*\)</Version>.*:\1:p' Directory.Build.props | head -1)
+          LAST_TAG=$(git tag -l 'v*' --sort=-v:refname | head -1)
+          echo "Directory.Build.props version: $CURRENT; last release tag: ${LAST_TAG:-none}"
+
+          if [ -n "$LAST_TAG" ] && [ "$(git rev-parse "$LAST_TAG^{commit}")" = "$(git rev-parse HEAD)" ]; then
+            # Unless the last run died between the push and publishing its draft: then main
+            # and the tag are out, but the Scoop manifest points at zips nobody can download.
+            # A draft may not even be visible to this token; missing or draft, the remedy is
+            # the same. Captured, then compared: a pipe into grep -q can fail on SIGPIPE.
+            PUBLISHED=$(gh release view "$LAST_TAG" --json isDraft -q 'if .isDraft then "draft" else "yes" end' 2>/dev/null || true)
+            if [ "$PUBLISHED" != "yes" ]; then
+              echo "::error::main is exactly $LAST_TAG, but $LAST_TAG has no published GitHub Release - scoop install fails until it has one. Publish its draft: git gh release edit $LAST_TAG --draft=false --latest -R $GITHUB_REPOSITORY. If the draft is gone, its zips are too (a rebuilt zip has another hash): merge anything to main and release again."
+              exit 1
+            fi
+            echo "main is exactly $LAST_TAG - nothing to release."
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ -n "${REQUESTED:-}" ]; then
+            V="$REQUESTED"
+          elif git rev-parse -q --verify "refs/tags/v$CURRENT" >/dev/null; then
+            # The props version is already out: next patch.
+            IFS=. read -r MA MI PA <<< "$CURRENT"
+            V="$MA.$MI.$((PA + 1))"
+          else
+            # The props carry a version nobody released yet (first release, or a bump made in
+            # a PR): release exactly that.
+            V="$CURRENT"
+          fi
+
+          if ! [[ "$V" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then echo "'$V' is not a plain x.y.z version"; exit 1; fi
+          if git rev-parse -q --verify "refs/tags/v$V" >/dev/null; then echo "tag v$V already exists"; exit 1; fi
+          HIGHEST=$(printf '%s\n%s\n' "$CURRENT" "$V" | sort -V | tail -1)
+          if [ "$HIGHEST" != "$V" ]; then echo "$V is below the Directory.Build.props version $CURRENT"; exit 1; fi
+
+          echo "releasing $V from $(git rev-parse HEAD)"
+          echo "should_release=true" >> "$GITHUB_OUTPUT"
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Require the NOPESPEAKER_RELEASE_TOKEN secret
+        if: steps.decide.outputs.should_release == 'true'
+        env:
+          HAS_TOKEN: ${{ secrets.NOPESPEAKER_RELEASE_TOKEN != '' }}
+        shell: bash
+        run: |
+          # main only accepts changes through pull requests; the release commit is pushed with
+          # a maintainer token that bypasses that rule. See DEVGUIDE.md -> Release.
+          if [ "$HAS_TOKEN" != "true" ]; then
+            echo "::error::Repository secret NOPESPEAKER_RELEASE_TOKEN is missing - the release push to main would be rejected."
+            exit 1
+          fi
+
+      - name: Verify CI on main is green
+        if: steps.decide.outputs.should_release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ steps.decide.outputs.sha }}
+        shell: bash
+        run: |
+          # Look at the CI run of the exact commit being released, not "the latest completed
+          # run on main": after quick successive merges that one may be a superseded, cancelled
+          # run. Wait while the run for that commit is still going (up to 20 minutes).
+          # Strict both ways: an API error is no verdict, and neither is a missing run.
+          for attempt in $(seq 1 40); do
+            if ! RUN=$(gh run list -w ci.yml -c "$SHA" -L 1 --json status,conclusion -q '.[0] // empty | "\(.status)/\(.conclusion)"'); then
+              echo "::error::Could not list the CI runs of $SHA. Refusing to release without CI's verdict."
+              exit 1
+            fi
+            case "$RUN" in
+              "")
+                # GitHub registers a push's runs shortly after the push; a dispatch right after
+                # a merge can beat it. Give it five minutes, then refuse.
+                if [ "$attempt" -ge 10 ]; then
+                  echo "::error::No CI run for $SHA after 5 minutes. Refusing to release."
+                  exit 1
+                fi
+                echo "No CI run for $SHA yet - waiting..."; sleep 30 ;;
+              completed/success) echo "CI for $SHA is success."; exit 0 ;;
+              completed/*) echo "CI for $SHA ended as '${RUN#completed/}'. Refusing to release."; exit 1 ;;
+              *) echo "CI for $SHA is $RUN - waiting..."; sleep 30 ;;
+            esac
+          done
+          echo "CI for $SHA did not finish in time. Refusing to release."
+          exit 1
+
+  release:
+    needs: check
+    if: needs.check.outputs.should_release == 'true'
+    runs-on: windows-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write # draft, publish or delete the GitHub Release (GITHUB_TOKEN)
+    env:
+      VERSION: ${{ needs.check.outputs.version }}
+    outputs:
+      x64_sha256: ${{ steps.pack.outputs.x64 }}
+      arm64_sha256: ${{ steps.pack.outputs.arm64 }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The commit the check job verified - main may have moved since (a merge while it
+          # waited for CI). That commit is released or nothing is: the push below is refused
+          # when main is no longer its parent.
+          ref: ${{ needs.check.outputs.sha }}
+          fetch-depth: 0
+          # No credentials in .git/config: the build, the tests and the NuGet packages they
+          # restore run in this job, and none of them needs to push. Only the push step gets
+          # the token.
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Stamp version and changelog
+        shell: pwsh
+        run: |
+          ./scripts/set-version.ps1 -Version $env:VERSION
+          # changelog.d/ fragments + Unreleased lines; with neither, the commit subjects since the last tag.
+          ./scripts/cut-changelog.ps1 -Version $env:VERSION -FallbackFromGit | Out-Null
+          Get-Content dist/release-notes.md
+
+      - name: Test the stamped core
+        shell: pwsh
+        run: dotnet test --project tests/NopeSpeaker.Core.Tests -c Release
+
+      - name: Pack x64 and ARM64
+        id: pack
+        shell: pwsh
+        run: |
+          foreach ($platform in 'x64', 'ARM64') {
+            $r = ./scripts/pack.ps1 -Platform $platform | Select-Object -Last 1
+            "$($platform.ToLowerInvariant())=$($r.Sha256)" >> $env:GITHUB_OUTPUT
+            "$platform $($r.Sha256) $($r.Zip)"
+          }
+
+      - name: Update Scoop manifest
+        env:
+          X64: ${{ steps.pack.outputs.x64 }}
+          ARM64: ${{ steps.pack.outputs.arm64 }}
+        shell: pwsh
+        run: |
+          $v = $env:VERSION
+          $path = 'bucket/nopespeaker.json'
+          $j = [IO.File]::ReadAllText($path)
+          # In-place edits keep the file's formatting; the autoupdate urls (v$version) are left alone.
+          $j = $j -replace '"version":\s*"[^"]*"', "`"version`": `"$v`""
+          $hashes = @{ x64 = $env:X64; arm64 = $env:ARM64 }
+          foreach ($arch in $hashes.Keys) {
+            $url = "https://github.com/WizX20/NopeSpeaker/releases/download/v$v/NopeSpeaker-$v-win-$arch.zip"
+            $j = $j -replace "(`"url`":\s*`")https://github\.com/WizX20/NopeSpeaker/releases/download/v\d[^`"]*-win-$arch\.zip(`",\s*`"hash`":\s*`")[^`"]*`"", "`${1}$url`${2}$($hashes[$arch])`""
+          }
+          [IO.File]::WriteAllText($path, $j, [Text.UTF8Encoding]::new($false))
+          $m = Get-Content $path -Raw | ConvertFrom-Json
+          # All of them or the manifest is broken: a stale url with a new hash is a hash mismatch.
+          if ($m.version -ne $v -or
+              $m.architecture.'64bit'.hash -ne $env:X64 -or $m.architecture.'64bit'.url -notlike "*/v$v/*-win-x64.zip" -or
+              $m.architecture.arm64.hash -ne $env:ARM64 -or $m.architecture.arm64.url -notlike "*/v$v/*-win-arm64.zip") {
+            throw 'manifest update did not take'
+          }
+          Get-Content $path
+
+      - name: Commit
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # -A stages the deletion of the changelog.d/ fragments cut-changelog folded in.
+          git add -A -- Directory.Build.props CHANGELOG.md bucket/nopespeaker.json changelog.d
+          git commit -m "chore: release v$VERSION"
+
+      # Order matters: the release exists as a draft, zips attached, before anything reaches main.
+      # Once the push lands, the Scoop manifest on main points at those zips; publishing the
+      # draft is then a single API call. A draft creates no tag, so a failed push leaves nothing
+      # behind but the draft, and the cleanup step below removes it.
+      - name: Draft the GitHub Release
+        id: draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # A draft left by an earlier failed run would otherwise sit next to this one.
+          if [ "$(gh release view "v$VERSION" --json isDraft -q .isDraft 2>/dev/null || true)" = "true" ]; then
+            gh release delete "v$VERSION" --yes
+          fi
+          gh release create "v$VERSION" --draft \
+            --title "NopeSpeaker v$VERSION" \
+            --notes-file dist/release-notes.md \
+            "dist/NopeSpeaker-$VERSION-win-x64.zip" \
+            "dist/NopeSpeaker-$VERSION-win-arm64.zip"
+
+      - name: Tag and push
+        id: push
+        env:
+          # Pushed as the maintainer (fine-grained PAT, repository admin): the only actor that
+          # may bypass the pull-request rule on main. GITHUB_TOKEN cannot on a user-owned repo.
+          TOKEN: ${{ secrets.NOPESPEAKER_RELEASE_TOKEN }}
+          GIT_TERMINAL_PROMPT: "0"
+          GCM_INTERACTIVE: never
+        shell: bash
+        run: |
+          git tag -a "v$VERSION" -m "NopeSpeaker v$VERSION"
+          # The token goes to this one git command as a header (what actions/checkout does with
+          # persist-credentials), never into .git/config.
+          AUTH=$(printf 'x-access-token:%s' "$TOKEN" | base64 | tr -d '\r\n')
+          echo "::add-mask::$AUTH"
+          # Atomic: the branch and the tag land together or not at all. A non-atomic push could
+          # leave the tag behind when main moved, and every later run would stop at "tag exists".
+          # The checkout is detached at the verified commit, so HEAD goes to main only when it
+          # still fast-forwards.
+          if ! git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $AUTH" \
+              push --atomic origin "HEAD:refs/heads/main" "refs/tags/v$VERSION"; then
+            echo "::error::Push refused - main probably moved while the release ran. Nothing was published; run the release again."
+            exit 1
+          fi
+
+      - name: Publish the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          # --latest explicitly: Scoop's checkver follows the latest release.
+          if ! gh release edit "v$VERSION" --draft=false --latest; then
+            echo "::error::main and tag v$VERSION are pushed, but publishing the draft failed - until it is published, scoop install fails. Publish it: git gh release edit v$VERSION --draft=false --latest -R $GITHUB_REPOSITORY"
+            exit 1
+          fi
+
+      - name: Remove the draft after a failed push
+        if: failure() && steps.draft.outcome == 'success' && steps.push.outcome != 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: gh release delete "v$VERSION" --yes
+
+  winget:
+    needs: [check, release]
+    # A scheduled run has no inputs, and null == false in an expression: name the event instead.
+    if: needs.release.result == 'success' && (github.event_name == 'schedule' || inputs.winget)
+    runs-on: windows-latest
+    timeout-minutes: 15
+    permissions: {}
+    env:
+      VERSION: ${{ needs.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.check.outputs.sha }}
+          persist-credentials: false
+
+      - name: Fill in the winget manifests
+        env:
+          X64: ${{ needs.release.outputs.x64_sha256 }}
+          ARM64: ${{ needs.release.outputs.arm64_sha256 }}
+        shell: pwsh
+        run: |
+          $out = "dist/winget/$env:VERSION"
+          New-Item -ItemType Directory -Force -Path $out | Out-Null
+          $today = (Get-Date).ToUniversalTime().ToString('yyyy-MM-dd')
+          foreach ($file in Get-ChildItem winget -Filter *.yaml) {
+            $text = [IO.File]::ReadAllText($file.FullName).
+              Replace('{{VERSION}}', $env:VERSION).Replace('{{RELEASE_DATE}}', $today).
+              Replace('{{X64_SHA256}}', $env:X64).Replace('{{ARM64_SHA256}}', $env:ARM64)
+            if ($text -match '\{\{\w+\}\}') { throw "$($file.Name): placeholder $($Matches[0]) left unfilled" }
+            [IO.File]::WriteAllText((Join-Path $out $file.Name), $text, [Text.UTF8Encoding]::new($false))
+          }
+          Get-ChildItem $out | ForEach-Object { "--- $($_.Name)"; Get-Content $_.FullName }
+
+      - name: Submit to winget-pkgs
+        env:
+          # A classic PAT (public_repo) of the account whose fork of microsoft/winget-pkgs
+          # carries the pull request. Without it the release stands; winget just waits.
+          WINGET_PAT: ${{ secrets.WINGET_PAT }}
+        shell: pwsh
+        run: |
+          if (-not $env:WINGET_PAT) {
+            "::warning::Repository secret WINGET_PAT is missing - v$env:VERSION was not submitted to winget. See DEVGUIDE.md -> Release."
+            return
+          }
+          Invoke-WebRequest -Uri https://aka.ms/wingetcreate/latest -OutFile wingetcreate.exe
+          # submit, not update: it works for the very first version too, and the manifests in
+          # winget/ stay the single source of the package metadata.
+          ./wingetcreate.exe submit --prtitle "New version: WizX20.NopeSpeaker version $env:VERSION" --token $env:WINGET_PAT "dist/winget/$env:VERSION"
+          if ($LASTEXITCODE) { throw "wingetcreate submit failed ($LASTEXITCODE)" }

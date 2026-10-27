@@ -41,6 +41,33 @@ To use a switched-off device again, flip it back on.
 
 - Windows 10 (2004) or Windows 11, x64 or ARM64
 
+## Install
+
+**Scoop:**
+
+```powershell
+scoop bucket add nopespeaker https://github.com/WizX20/NopeSpeaker
+scoop install nopespeaker
+```
+
+NopeSpeaker is then in the Start menu (Scoop Apps); `scoop update nopespeaker` gets new versions.
+
+**winget:**
+
+```powershell
+winget install WizX20.NopeSpeaker
+```
+
+Start it with `nopespeaker` from the Run dialog or a terminal. (Each version is reviewed by the
+winget moderators first, so a new release can take a few days to show up there.)
+
+**Zip:** download `NopeSpeaker-<version>-win-x64.zip` (or `-win-arm64.zip`) from the
+[latest release](https://github.com/WizX20/NopeSpeaker/releases/latest), unzip it anywhere and run
+`NopeSpeaker.exe`. Nothing to install: the Windows App SDK ships inside.
+
+The app is not code-signed yet, so Windows SmartScreen may warn on first start ("More info" →
+"Run anyway"). A Microsoft Store version is planned ([#23](https://github.com/WizX20/NopeSpeaker/issues/23)).
+
 ## Build from source
 
 ```powershell

@@ -1,0 +1,21 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.10.0.schema.json
+PackageIdentifier: WizX20.NopeSpeaker
+PackageVersion: {{VERSION}}
+MinimumOSVersion: 10.0.19041.0
+InstallerType: zip
+NestedInstallerType: portable
+NestedInstallerFiles:
+  - RelativeFilePath: NopeSpeaker.exe
+    PortableCommandAlias: nopespeaker
+# The exe needs the Windows App SDK files next to it: put the folder on PATH, no symlink.
+ArchiveBinariesDependOnPath: true
+ReleaseDate: {{RELEASE_DATE}}
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/WizX20/NopeSpeaker/releases/download/v{{VERSION}}/NopeSpeaker-{{VERSION}}-win-x64.zip
+    InstallerSha256: {{X64_SHA256}}
+  - Architecture: arm64
+    InstallerUrl: https://github.com/WizX20/NopeSpeaker/releases/download/v{{VERSION}}/NopeSpeaker-{{VERSION}}-win-arm64.zip
+    InstallerSha256: {{ARM64_SHA256}}
+ManifestType: installer
+ManifestVersion: 1.10.0

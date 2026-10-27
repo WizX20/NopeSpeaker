@@ -46,4 +46,5 @@ state the device ends up in. One change runs at a time. A declined prompt revert
 - Tray icon: switch audio devices from the notification area without opening the window.
 - A PowerToys Command Palette extension on top of `NopeSpeaker.Core`.
 - Connect/disconnect a device from the list.
-- Release workflow: signed zip on GitHub Releases, a winget manifest.
+- Code signing for the zips, and a Microsoft Store (MSIX) version (#23). The releases themselves -
+  GitHub Releases, Scoop, winget - run weekly ([DEVGUIDE.md → Release](../DEVGUIDE.md#release)).

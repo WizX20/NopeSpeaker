@@ -48,6 +48,12 @@ tasks:
     cmds:
       - pwsh -NoProfile -File scripts/pack.ps1 -Platform {{.PLATFORM}}
 
+  release:
+    desc: Dispatch the Release workflow now (also runs weekly on its own). VERSION=x.y.z forces a version, else next patch
+    cmds:
+      - git gh workflow run release.yml -f version={{.VERSION}}
+      - git gh run list -w release.yml -L 1
+
   gh:
     desc: Run the GitHub CLI as WizX20 without switching accounts, e.g. task gh -- pr status
     cmds:

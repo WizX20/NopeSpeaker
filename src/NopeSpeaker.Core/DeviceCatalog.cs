@@ -1,4 +1,4 @@
-namespace XBlueTooth.Core;
+namespace NopeSpeaker.Core;
 
 /// <summary>Puts the paired devices and the device tree together.</summary>
 public static class DeviceCatalog

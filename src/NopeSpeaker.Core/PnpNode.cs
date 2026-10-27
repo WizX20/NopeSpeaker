@@ -1,6 +1,6 @@
-namespace XBlueTooth.Core;
+namespace NopeSpeaker.Core;
 
-/// <summary>A node in the Plug and Play device tree, as much of it as xBlueTooth needs.</summary>
+/// <summary>A node in the Plug and Play device tree, as much of it as NopeSpeaker needs.</summary>
 /// <param name="InstanceId">The device instance ID, e.g. <c>BTHENUM\{0000110B-...}_LOCALMFG&amp;0002\7&amp;...</c>.</param>
 /// <param name="Name">The friendly name Device Manager shows.</param>
 /// <param name="ClassGuid">The device setup class.</param>

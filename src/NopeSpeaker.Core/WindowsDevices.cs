@@ -1,6 +1,6 @@
 using Windows.Devices.Enumeration;
 
-namespace XBlueTooth.Core;
+namespace NopeSpeaker.Core;
 
 /// <summary>Reads the paired Bluetooth devices and their device-tree nodes from Windows.</summary>
 public static class WindowsDevices

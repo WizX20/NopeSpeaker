@@ -6,9 +6,9 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
 using Windows.Devices.Enumeration;
 using Windows.Graphics;
-using XBlueTooth.Core;
+using NopeSpeaker.Core;
 
-namespace XBlueTooth;
+namespace NopeSpeaker;
 
 public sealed partial class MainWindow : Window
 {
@@ -32,7 +32,7 @@ public sealed partial class MainWindow : Window
         // AppWindow sizes in physical pixels: scale for the display.
         var scale = GetDpiForWindow(WinRT.Interop.WindowNative.GetWindowHandle(this)) / 96.0;
         AppWindow.Resize(new SizeInt32((int)(960 * scale), (int)(720 * scale)));
-        AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets", "xBlueTooth.ico"));
+        AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets", "NopeSpeaker.ico"));
         Devices.ItemsSource = _items;
 
         // A device connecting fires a burst of updates: refresh once it settles.

@@ -1,6 +1,6 @@
 using Microsoft.UI.Xaml;
 
-namespace XBlueTooth;
+namespace NopeSpeaker;
 
 public partial class App : Application
 {

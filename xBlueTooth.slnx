@@ -1,9 +1,0 @@
-<Solution>
-  <Folder Name="/src/">
-    <Project Path="src/xBlueTooth.Core/xBlueTooth.Core.csproj" />
-    <Project Path="src/xBlueTooth/xBlueTooth.csproj" />
-  </Folder>
-  <Folder Name="/tests/">
-    <Project Path="tests/xBlueTooth.Core.Tests/xBlueTooth.Core.Tests.csproj" />
-  </Folder>
-</Solution>

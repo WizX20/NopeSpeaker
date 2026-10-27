@@ -14,13 +14,13 @@ body:
     attributes:
       label: Pre-flight
       options:
-        - label: I searched [open and closed issues](https://github.com/WizX20/xBlueTooth/issues?q=) for duplicates.
+        - label: I searched [open and closed issues](https://github.com/WizX20/NopeSpeaker/issues?q=) for duplicates.
           required: true
 
   - type: input
     id: version
     attributes:
-      label: xBlueTooth version
+      label: NopeSpeaker version
       description: "The version from the zip name - or `main` + commit if you build from a checkout."
       placeholder: "0.1.0"
     validations:

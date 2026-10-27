@@ -1,4 +1,4 @@
-namespace XBlueTooth.Core;
+namespace NopeSpeaker.Core;
 
 /// <summary>A paired Bluetooth device as Windows' association endpoints report it.</summary>
 /// <param name="Name">The device name.</param>

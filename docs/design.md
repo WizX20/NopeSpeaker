@@ -1,4 +1,4 @@
-# xBlueTooth design
+# NopeSpeaker design
 
 ## Problem
 
@@ -44,6 +44,6 @@ state the device ends up in. One change runs at a time. A declined prompt revert
 ## Roadmap
 
 - Tray icon: switch audio devices from the notification area without opening the window.
-- A PowerToys Command Palette extension on top of `xBlueTooth.Core`.
+- A PowerToys Command Palette extension on top of `NopeSpeaker.Core`.
 - Connect/disconnect a device from the list.
 - Release workflow: signed zip on GitHub Releases, a winget manifest.

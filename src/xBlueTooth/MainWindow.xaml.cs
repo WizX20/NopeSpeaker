@@ -81,13 +81,19 @@ public sealed partial class MainWindow : Window
             return;
         }
 
+        await LoadAsync();
+    }
+
+    // Reads the devices and shows them, unless a newer refresh or a change started meanwhile.
+    private async Task LoadAsync()
+    {
         var generation = ++_generation;
         _refreshing++;
         Loading.IsActive = true;
         try
         {
             var devices = await WindowsDevices.GetDevicesAsync();
-            if (generation == _generation && !_changing)
+            if (generation == _generation)
             {
                 Show(devices);
             }
@@ -147,11 +153,16 @@ public sealed partial class MainWindow : Window
 
     private async void OnRefreshClick(object sender, RoutedEventArgs e) => await RefreshAsync();
 
+    // A HyperlinkButton's NavigateUri does nothing for ms-settings: in an unpackaged app.
+    private async void OnBluetoothSettingsClick(object sender, RoutedEventArgs e) =>
+        await Windows.System.Launcher.LaunchUriAsync(new Uri("ms-settings:bluetooth"));
+
     private async void OnAudioToggled(object sender, RoutedEventArgs e)
     {
+        // The row comes in Tag: the switch sits in the card's content and has no DataContext.
         // Toggled also fires when the binding sets IsOn: only a flip away from the device's state
         // is the user's.
-        if (sender is not ToggleSwitch { DataContext: DeviceItem item } toggle
+        if (sender is not ToggleSwitch { Tag: DeviceItem item } toggle
             || toggle.IsOn == item.IsAudioEnabled
             || _changing)
         {
@@ -165,6 +176,12 @@ public sealed partial class MainWindow : Window
         try
         {
             outcome = await ElevatedPnp.SetEnabledAsync(item.Device.AudioNodes.Select(n => n.InstanceId), enable);
+            // The switches stay locked until the list shows the new state: a flip before that
+            // would be compared with the old one.
+            if (outcome.Result != ChangeResult.Cancelled)
+            {
+                await LoadAsync();
+            }
         }
         catch (Exception ex)
         {
@@ -178,7 +195,7 @@ public sealed partial class MainWindow : Window
         if (outcome.Result == ChangeResult.Cancelled)
         {
             // Nothing changed: the switch goes back - unless the row was reused for another device.
-            if (toggle.DataContext == item)
+            if (toggle.Tag == item)
             {
                 toggle.IsOn = item.IsAudioEnabled;
             }
@@ -187,8 +204,6 @@ public sealed partial class MainWindow : Window
                 "Changing a device needs administrator rights, and the prompt was declined.");
             return;
         }
-
-        await RefreshAsync();
 
         // Switching off the audio driver can take its endpoint with it, which the script reports
         // as a failure: what counts is the state the device ends up in.

@@ -33,7 +33,7 @@
                     <TextBlock Text="Paired devices" Style="{StaticResource BodyStrongTextBlockStyle}" VerticalAlignment="Center" />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
                         <ProgressRing x:Name="Loading" IsActive="False" Width="16" Height="16" />
-                        <HyperlinkButton Content="Bluetooth settings" NavigateUri="ms-settings:bluetooth" />
+                        <HyperlinkButton Content="Bluetooth settings" Click="OnBluetoothSettingsClick" />
                         <Button Click="OnRefreshClick" ToolTipService.ToolTip="Refresh">
                             <FontIcon Glyph="&#xE72C;" FontSize="14" />
                         </Button>
@@ -58,7 +58,7 @@
                                     <FontIcon Glyph="{x:Bind Glyph, Mode=OneWay}" />
                                 </toolkit:SettingsCard.HeaderIcon>
                                 <Grid>
-                                    <ToggleSwitch IsOn="{x:Bind IsAudioEnabled, Mode=OneWay}" IsEnabled="{x:Bind IsIdle, Mode=OneWay}"
+                                    <ToggleSwitch Tag="{x:Bind}" IsOn="{x:Bind IsAudioEnabled, Mode=OneWay}" IsEnabled="{x:Bind IsIdle, Mode=OneWay}"
                                                   Visibility="{x:Bind HasAudio, Mode=OneWay}" OnContent="Audio on" OffContent="Audio off"
                                                   Toggled="OnAudioToggled" />
                                 </Grid>

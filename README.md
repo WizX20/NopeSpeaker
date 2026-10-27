@@ -1,6 +1,19 @@
+<p align="center">
+  <a href="https://github.com/WizX20">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="docs/wizx20.png">
+      <img src="docs/wizx20-transparent.png" alt="WizX20" height="140">
+    </picture>
+  </a>
+</p>
+
 # NopeSpeaker
 
 [![CI](https://github.com/WizX20/NopeSpeaker/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/WizX20/NopeSpeaker/actions/workflows/ci.yml)
+
+<p align="center">
+  <img src="docs/nopespeaker-logo.png" alt="NopeSpeaker logo: a speaker struck through by a lightning bolt" width="420">
+</p>
 
 > Your speaker connects. Windows wants to play on it. **Nope.**
 

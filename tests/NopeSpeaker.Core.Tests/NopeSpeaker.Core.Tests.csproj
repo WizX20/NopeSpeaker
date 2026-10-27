@@ -19,6 +19,6 @@
     <Using Include="Xunit" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\xBlueTooth.Core\xBlueTooth.Core.csproj" />
+    <ProjectReference Include="..\..\src\NopeSpeaker.Core\NopeSpeaker.Core.csproj" />
   </ItemGroup>
 </Project>

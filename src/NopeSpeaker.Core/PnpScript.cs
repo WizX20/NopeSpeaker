@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace XBlueTooth.Core;
+namespace NopeSpeaker.Core;
 
 /// <summary>
 /// The PowerShell that switches device nodes on or off. It runs elevated: disabling a device needs

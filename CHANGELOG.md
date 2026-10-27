@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to xBlueTooth are listed here, newest first. The format follows
+All notable changes to NopeSpeaker are listed here, newest first. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions are [semantic](https://semver.org/).
 New entries go in [changelog.d/](changelog.d/README.md), one file per pull request - the release folds them in here under the new version and date.
 

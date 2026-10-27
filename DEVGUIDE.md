@@ -3,9 +3,9 @@
 ## Layout
 
 ```
-src/xBlueTooth.Core/    devices, no UI: WindowsDevices (read), ElevatedPnp (change), DeviceCatalog, PnpScript
-src/xBlueTooth/         the WinUI 3 app: MainWindow, DeviceItem
-tests/xBlueTooth.Core.Tests/   xUnit v3 + FluentAssertions 7, pure logic only
+src/NopeSpeaker.Core/    devices, no UI: WindowsDevices (read), ElevatedPnp (change), DeviceCatalog, PnpScript
+src/NopeSpeaker/         the WinUI 3 app: MainWindow, DeviceItem
+tests/NopeSpeaker.Core.Tests/   xUnit v3 + FluentAssertions 7, pure logic only
 docs/design.md          how and why
 changelog.d/            changelog fragments, one per pull request
 ```
@@ -21,7 +21,7 @@ task run     # build and start
 task test    # the core's tests
 task coverage  # the tests with coverage: dist/core-coverage.cobertura.xml
 task check   # Release build + tests, before every push
-task pack    # dist/xBlueTooth-<version>-win-x64.zip
+task pack    # dist/NopeSpeaker-<version>-win-x64.zip
 ```
 
 The app is unpackaged (`WindowsPackageType=None`) and self-contained

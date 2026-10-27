@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 
-namespace XBlueTooth.Core;
+namespace NopeSpeaker.Core;
 
 /// <summary>How a change to device nodes went.</summary>
 public enum ChangeResult
@@ -35,7 +35,7 @@ public static class ElevatedPnp
     {
         // The elevated script writes its errors here: its window is hidden, and a runas process
         // cannot have its output redirected.
-        var errorFile = Path.Combine(Path.GetTempPath(), $"xBlueTooth-{Guid.NewGuid():N}.txt");
+        var errorFile = Path.Combine(Path.GetTempPath(), $"NopeSpeaker-{Guid.NewGuid():N}.txt");
         var script = PnpScript.Build(instanceIds, enable, errorFile);
         // The full path: an elevated process should not be whatever powershell.exe PATH finds first.
         var powershell = Path.Combine(Environment.SystemDirectory, "WindowsPowerShell", "v1.0", "powershell.exe");

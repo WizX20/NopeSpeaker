@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <!-- What xBlueTooth knows about devices, without any UI: finding the paired Bluetooth devices and
+  <!-- What NopeSpeaker knows about devices, without any UI: finding the paired Bluetooth devices and
        their audio nodes, and switching those nodes on and off. No package dependencies. -->
   <PropertyGroup>
-    <RootNamespace>XBlueTooth.Core</RootNamespace>
+    <RootNamespace>NopeSpeaker.Core</RootNamespace>
     <AnalysisMode>Recommended</AnalysisMode>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <!-- Also what lets the build report unused usings (IDE0005, raised in .editorconfig). -->

@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/NopeSpeaker.Core/NopeSpeaker.Core.csproj" />
+    <Project Path="src/NopeSpeaker/NopeSpeaker.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/NopeSpeaker.Core.Tests/NopeSpeaker.Core.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -6,14 +6,14 @@ body:
   - type: markdown
     attributes:
       value: |
-        Describe the use case first, the proposed solution second. Check the [roadmap in docs/design.md](https://github.com/WizX20/xBlueTooth/blob/main/docs/design.md#roadmap) first: it may already be planned.
+        Describe the use case first, the proposed solution second. Check the [roadmap in docs/design.md](https://github.com/WizX20/NopeSpeaker/blob/main/docs/design.md#roadmap) first: it may already be planned.
 
   - type: checkboxes
     id: prechecks
     attributes:
       label: Pre-flight
       options:
-        - label: I searched [open and closed issues](https://github.com/WizX20/xBlueTooth/issues?q=) for an existing request.
+        - label: I searched [open and closed issues](https://github.com/WizX20/NopeSpeaker/issues?q=) for an existing request.
           required: true
 
   - type: textarea

@@ -1,8 +1,8 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using XBlueTooth.Core;
+using NopeSpeaker.Core;
 
-namespace XBlueTooth;
+namespace NopeSpeaker;
 
 /// <summary>One row in the device list. A refresh updates it in place, so the row keeps focus and scroll.</summary>
 public sealed partial class DeviceItem(BluetoothDevice device) : INotifyPropertyChanged

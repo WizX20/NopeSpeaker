@@ -1,7 +1,7 @@
 using System.Text;
-using XBlueTooth.Core;
+using NopeSpeaker.Core;
 
-namespace XBlueTooth.Core.Tests;
+namespace NopeSpeaker.Core.Tests;
 
 public class PnpScriptTests
 {

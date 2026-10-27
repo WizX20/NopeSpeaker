@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for taking the time to contribute to xBlueTooth.
+Thanks for taking the time to contribute to NopeSpeaker.
 
 For building from source and the layout, see [DEVGUIDE.md](DEVGUIDE.md); for how it works, [docs/design.md](docs/design.md).
 
@@ -8,7 +8,7 @@ By participating in this project you agree to abide by the [Code of Conduct](COD
 
 ## Reporting bugs
 
-Open a [GitHub issue](https://github.com/WizX20/xBlueTooth/issues/new/choose) with:
+Open a [GitHub issue](https://github.com/WizX20/NopeSpeaker/issues/new/choose) with:
 
 - What you did (numbered steps) and which device (make and model)
 - What you expected and what happened

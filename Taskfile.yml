@@ -4,7 +4,7 @@ version: '3'
 
 vars:
   PLATFORM: '{{.PLATFORM | default "x64"}}'
-  APP: src/xBlueTooth
+  APP: src/NopeSpeaker
 
 tasks:
   setup:
@@ -25,12 +25,12 @@ tasks:
   test:
     desc: The core's xUnit tests
     cmds:
-      - dotnet test --project tests/xBlueTooth.Core.Tests {{.CLI_ARGS}}
+      - dotnet test --project tests/NopeSpeaker.Core.Tests {{.CLI_ARGS}}
 
   coverage:
     desc: The core's tests with code coverage - dist/core-coverage.cobertura.xml
     cmds:
-      - dotnet test --project tests/xBlueTooth.Core.Tests --coverage --coverage-output-format cobertura --coverage-output core-coverage.cobertura.xml --results-directory {{.ROOT_DIR}}/dist
+      - dotnet test --project tests/NopeSpeaker.Core.Tests --coverage --coverage-output-format cobertura --coverage-output core-coverage.cobertura.xml --results-directory {{.ROOT_DIR}}/dist
 
   run:
     desc: Build and start the app
@@ -41,7 +41,7 @@ tasks:
     desc: Release build + tests - run before every push
     cmds:
       - dotnet build {{.APP}} -c Release -p:Platform={{.PLATFORM}}
-      - dotnet test --project tests/xBlueTooth.Core.Tests -c Release
+      - dotnet test --project tests/NopeSpeaker.Core.Tests -c Release
 
   pack:
     desc: Publish the app and zip it into dist/ (PLATFORM=x64|ARM64)

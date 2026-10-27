@@ -1,4 +1,4 @@
-namespace XBlueTooth.Core;
+namespace NopeSpeaker.Core;
 
 /// <summary>Whether Windows may play audio on a device.</summary>
 public enum AudioState

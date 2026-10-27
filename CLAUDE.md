@@ -4,7 +4,7 @@ Guidance for Claude Code when working in this repository.
 
 ## What this is
 
-**xBlueTooth** — a WinUI 3 app (Windows App SDK, unpackaged, self-contained) that lists the paired Bluetooth devices and switches, per device, whether Windows may play audio on it: it disables or enables the device's `MEDIA` and `AudioEndpoint` nodes through an elevated `Disable-PnpDevice`/`Enable-PnpDevice`. Design: [docs/design.md](docs/design.md). Layout, build and tests: [DEVGUIDE.md](DEVGUIDE.md). Conventions: [CONTRIBUTING.md](CONTRIBUTING.md).
+**NopeSpeaker** — a WinUI 3 app (Windows App SDK, unpackaged, self-contained) that lists the paired Bluetooth devices and switches, per device, whether Windows may play audio on it: it disables or enables the device's `MEDIA` and `AudioEndpoint` nodes through an elevated `Disable-PnpDevice`/`Enable-PnpDevice`. Design: [docs/design.md](docs/design.md). Layout, build and tests: [DEVGUIDE.md](DEVGUIDE.md). Conventions: [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## GitHub account — always WizX20
 
@@ -21,12 +21,12 @@ task check   # build + tests — run before every push
 task build   # core + app (x64)
 task test    # the core's xUnit tests
 task run     # build and start the app
-task pack    # dist/xBlueTooth-<version>-win-<arch>.zip
+task pack    # dist/NopeSpeaker-<version>-win-<arch>.zip
 ```
 
 ## Rules
 
-- **Core vs app**: everything about devices lives in `src/xBlueTooth.Core` (no UI, no package dependencies); `src/xBlueTooth` is only the window. Pure logic (grouping, state, the PowerShell it runs) gets xUnit tests; FluentAssertions stays on **7.x** — 8 is commercial.
+- **Core vs app**: everything about devices lives in `src/NopeSpeaker.Core` (no UI, no package dependencies); `src/NopeSpeaker` is only the window. Pure logic (grouping, state, the PowerShell it runs) gets xUnit tests; FluentAssertions stays on **7.x** — 8 is commercial.
 - **Never touch a real device from a test.** Tests build `PairedDevice`/`PnpNode` values by hand; nothing calls `WindowsDevices` or `ElevatedPnp`.
 - **The app runs as the user.** Only the change itself elevates, one UAC prompt per change; never `requireAdministrator` in the manifest.
 - **Instance IDs go into PowerShell single-quoted** (`PnpScript` accepts only valid instance IDs and doubles every kind of single quote) and the script travels as `-EncodedCommand`; never splice an ID into a command line.

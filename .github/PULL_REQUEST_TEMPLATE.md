@@ -19,11 +19,11 @@ Thanks for the PR! Fill in the sections below — the checklist at the bottom ca
 <!-- How you verified this, and on which device(s). -->
 
 - [ ] `task check` passes locally
-- [ ] Logic in `xBlueTooth.Core` has an xUnit test; no test touches a real device
+- [ ] Logic in `NopeSpeaker.Core` has an xUnit test; no test touches a real device
 - [ ] Tried in the app (screenshot for UI changes)
 
 ## Checklist
 
 - [ ] A changelog fragment in `changelog.d/` (user-visible changes only; see `changelog.d/README.md`) - not an edit to `CHANGELOG.md`.
 - [ ] `docs/design.md` updated if the change deviates from it.
-- [ ] Commits follow the conventions in [CONTRIBUTING.md](https://github.com/WizX20/xBlueTooth/blob/main/CONTRIBUTING.md) (imperative subject ≤72 chars, new commits not amends, hooks not skipped).
+- [ ] Commits follow the conventions in [CONTRIBUTING.md](https://github.com/WizX20/NopeSpeaker/blob/main/CONTRIBUTING.md) (imperative subject ≤72 chars, new commits not amends, hooks not skipped).

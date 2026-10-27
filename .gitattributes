@@ -1,0 +1,8 @@
+# Normalise line endings in the repo.
+* text=auto
+# bash is not so forgiving: a CR ends up in the command.
+*.sh text eol=lf
+
+*.png binary
+*.ico binary
+*.zip binary

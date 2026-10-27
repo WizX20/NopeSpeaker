@@ -1,0 +1,54 @@
+# Task runner (https://taskfile.dev) — `task --list` for an overview.
+# CI runs the tests and pack; `task check` is the local gate before a push.
+version: '3'
+
+vars:
+  PLATFORM: '{{.PLATFORM | default "x64"}}'
+  APP: src/xBlueTooth
+
+tasks:
+  setup:
+    desc: Maintainer, once per clone and after .gitconfig changes - route all GitHub traffic from this repo through the WizX20 account (see .gitconfig)
+    cmds:
+      # A copy of main's file inside .git, not the checked-out one: a branch you check out cannot change it.
+      - git show origin/main:.gitconfig > "$(git rev-parse --git-common-dir)/wizx20.gitconfig" 2>/dev/null || git show HEAD:.gitconfig > "$(git rev-parse --git-common-dir)/wizx20.gitconfig"
+      - git config --local --unset-all include.path || true
+      - git config --local include.path wizx20.gitconfig
+      - git config user.name
+      - git config user.email
+
+  build:
+    desc: Build core + app (PLATFORM=x64|ARM64, default x64)
+    cmds:
+      - dotnet build {{.APP}} -p:Platform={{.PLATFORM}} {{.CLI_ARGS}}
+
+  test:
+    desc: The core's xUnit tests
+    cmds:
+      - dotnet test --project tests/xBlueTooth.Core.Tests {{.CLI_ARGS}}
+
+  coverage:
+    desc: The core's tests with code coverage - dist/core-coverage.cobertura.xml
+    cmds:
+      - dotnet test --project tests/xBlueTooth.Core.Tests --coverage --coverage-output-format cobertura --coverage-output core-coverage.cobertura.xml --results-directory {{.ROOT_DIR}}/dist
+
+  run:
+    desc: Build and start the app
+    cmds:
+      - dotnet run --project {{.APP}} -p:Platform={{.PLATFORM}}
+
+  check:
+    desc: Release build + tests - run before every push
+    cmds:
+      - dotnet build {{.APP}} -c Release -p:Platform={{.PLATFORM}}
+      - dotnet test --project tests/xBlueTooth.Core.Tests -c Release
+
+  pack:
+    desc: Publish the app and zip it into dist/ (PLATFORM=x64|ARM64)
+    cmds:
+      - pwsh -NoProfile -File scripts/pack.ps1 -Platform {{.PLATFORM}}
+
+  gh:
+    desc: Run the GitHub CLI as WizX20 without switching accounts, e.g. task gh -- pr status
+    cmds:
+      - git gh {{.CLI_ARGS}}

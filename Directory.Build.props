@@ -1,0 +1,20 @@
+<Project>
+  <!-- Shared by every project. The Windows SDK target gives the WinRT device APIs
+       (Windows.Devices.Enumeration); the minimum is Windows 10 2004 (19041), what the README promises.
+       LangVersion is pinned so a newer SDK compiles the same language. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows10.0.22621.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
+    <SupportedOSPlatformVersion>10.0.19041.0</SupportedOSPlatformVersion>
+    <LangVersion>14</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Deterministic>true</Deterministic>
+    <Version>0.1.0</Version>
+    <Authors>WizX20</Authors>
+    <Company>WizX20</Company>
+    <Copyright>(c) 2026 WizX20. MIT License.</Copyright>
+    <Product>xBlueTooth</Product>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,17 @@
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{cs,xaml}]
+indent_size = 4
+
+[*.{csproj,props,targets,xml,yml,yaml,json,slnx}]
+indent_size = 2
+
+[*.cs]
+# Unused usings fail the build of the core (EnforceCodeStyleInBuild + GenerateDocumentationFile).
+dotnet_diagnostic.IDE0005.severity = warning

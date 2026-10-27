@@ -1,0 +1,76 @@
+name: Bug report
+description: Something doesn't work the way it should.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. The more concrete the repro, the faster it gets fixed.
+        Paste output as text rather than screenshots where you can.
+
+  - type: checkboxes
+    id: prechecks
+    attributes:
+      label: Pre-flight
+      options:
+        - label: I searched [open and closed issues](https://github.com/WizX20/xBlueTooth/issues?q=) for duplicates.
+          required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: xBlueTooth version
+      description: "The version from the zip name - or `main` + commit if you build from a checkout."
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Windows
+      description: "Version and architecture (Settings > System > About)."
+      placeholder: "Windows 11 24H2, x64"
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: Device
+      description: Make and model of the Bluetooth device involved.
+      placeholder: "Make and model, e.g. Contoso SoundBar 300"
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Number the steps so they can be followed verbatim.
+      placeholder: |
+        1. Switch the audio of … off
+        2. …
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+      description: What happened, including any error the app showed.
+    validations:
+      required: true
+
+  - type: textarea
+    id: pnp
+    attributes:
+      label: Device nodes
+      description: "Output of `Get-PnpDevice | ? FriendlyName -like '*<device>*' | Select Status, Class, FriendlyName, InstanceId`"
+      render: text

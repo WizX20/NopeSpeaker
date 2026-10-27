@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- What xBlueTooth knows about devices, without any UI: finding the paired Bluetooth devices and
+       their audio nodes, and switching those nodes on and off. No package dependencies. -->
+  <PropertyGroup>
+    <RootNamespace>XBlueTooth.Core</RootNamespace>
+    <AnalysisMode>Recommended</AnalysisMode>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <!-- Also what lets the build report unused usings (IDE0005, raised in .editorconfig). -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+</Project>

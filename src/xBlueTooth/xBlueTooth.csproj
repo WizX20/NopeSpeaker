@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The WinUI 3 app (Windows App SDK, the stack PowerToys runs on). Unpackaged and self-contained:
+       the Windows App SDK runtime ships next to the exe, nothing to install first. -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>XBlueTooth</RootNamespace>
+    <AssemblyName>xBlueTooth</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\xBlueTooth.ico</ApplicationIcon>
+    <Platforms>x64;ARM64</Platforms>
+    <RuntimeIdentifiers>win-x64;win-arm64</RuntimeIdentifiers>
+    <UseWinUI>true</UseWinUI>
+    <WindowsPackageType>None</WindowsPackageType>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <EnableMsixTooling>true</EnableMsixTooling>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.WinUI.Controls.SettingsControls" Version="8.2.251219" />
+    <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.8.260921001" />
+  </ItemGroup>
+  <!-- The Windows App SDK metapackage (the toolkit needs it) also brings the AI and ML runtimes:
+       onnxruntime, DirectML and Microsoft.Windows.AI.*, ~45 MB in a self-contained build the app
+       never loads. A self-contained build unpacks them from the runtime MSIX: drop them by name before
+       they are copied or published. -->
+  <PropertyGroup>
+    <_UnusedWindowsAppSDKFiles>^(DirectML\.dll|onnxruntime.*\.dll|Microsoft\.ML\.OnnxRuntime\.dll|Microsoft\.Windows\.AI\..*)$</_UnusedWindowsAppSDKFiles>
+  </PropertyGroup>
+  <Target Name="DropUnusedWindowsAppSDKFiles" AfterTargets="ResolveAssemblyReferences;AddMicrosoftWindowsAppSDKPayloadFilesFromComponents" BeforeTargets="AssignTargetPaths;_CopyFilesMarkedCopyLocal">
+    <ItemGroup>
+      <None Remove="@(None)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(Filename)%(Extension)', '$(_UnusedWindowsAppSDKFiles)', RegexOptions.IgnoreCase))" />
+      <ReferenceCopyLocalPaths Remove="@(ReferenceCopyLocalPaths)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(Filename)%(Extension)', '$(_UnusedWindowsAppSDKFiles)', RegexOptions.IgnoreCase))" />
+    </ItemGroup>
+  </Target>
+  <Target Name="DropUnusedWindowsAppSDKPublishFiles" AfterTargets="ComputeResolvedFilesToPublishList">
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)" Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('%(Filename)%(Extension)', '$(_UnusedWindowsAppSDKFiles)', RegexOptions.IgnoreCase))" />
+    </ItemGroup>
+  </Target>
+  <ItemGroup>
+    <Content Include="Assets\xBlueTooth.ico" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\xBlueTooth.Core\xBlueTooth.Core.csproj" />
+  </ItemGroup>
+</Project>

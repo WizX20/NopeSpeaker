@@ -1,0 +1,33 @@
+version: 2
+updates:
+  # The actions in the workflows. Monthly is plenty for a repo this size.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+      - ci
+    commit-message:
+      prefix: chore
+      include: scope
+
+  # Windows App SDK, the toolkit and the test packages, in one pull request.
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      nuget:
+        patterns: ["*"]
+    ignore:
+      # From 8.0 on FluentAssertions carries a commercial license (Xceed); 7.x is Apache 2.0.
+      - dependency-name: FluentAssertions
+        update-types: ["version-update:semver-major"]

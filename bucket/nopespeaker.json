@@ -1,0 +1,34 @@
+{
+  "version": "0.1.0",
+  "description": "NopeSpeaker - choose, per Bluetooth speaker or headset, whether Windows may switch your audio to it when it connects.",
+  "homepage": "https://github.com/WizX20/NopeSpeaker",
+  "license": "MIT",
+  "architecture": {
+    "64bit": {
+      "url": "https://github.com/WizX20/NopeSpeaker/releases/download/v0.1.0/NopeSpeaker-0.1.0-win-x64.zip",
+      "hash": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    "arm64": {
+      "url": "https://github.com/WizX20/NopeSpeaker/releases/download/v0.1.0/NopeSpeaker-0.1.0-win-arm64.zip",
+      "hash": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  },
+  "shortcuts": [
+    [
+      "NopeSpeaker.exe",
+      "NopeSpeaker"
+    ]
+  ],
+  "checkver": "github",
+  "autoupdate": {
+    "architecture": {
+      "64bit": {
+        "url": "https://github.com/WizX20/NopeSpeaker/releases/download/v$version/NopeSpeaker-$version-win-x64.zip"
+      },
+      "arm64": {
+        "url": "https://github.com/WizX20/NopeSpeaker/releases/download/v$version/NopeSpeaker-$version-win-arm64.zip"
+      }
+    }
+  },
+  "notes": "NopeSpeaker is in the Start menu (Scoop Apps). Each change to a device asks for administrator rights (UAC)."
+}

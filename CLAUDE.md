@@ -22,6 +22,7 @@ task build   # core + app (x64)
 task test    # the core's xUnit tests
 task run     # build and start the app
 task pack    # dist/NopeSpeaker-<version>-win-<arch>.zip
+task release # dispatch the Release workflow (GitHub Release + Scoop + winget); also runs weekly
 ```
 
 ## Rules

@@ -1,1 +1,1 @@
-- changed: docs - the README shows the NopeSpeaker logo and the WizX20 banner
+- changed: docs - the README opens with the NopeSpeaker logo
